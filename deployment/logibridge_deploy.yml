@@ -1,0 +1,116 @@
+---
+- name: Deploy LogiBridge Edge Inference Stack
+  hosts: edge_nodes
+  become: yes
+  vars:
+    project_dir: /opt/logibridge
+    docker_compose_version: "v2.24.1"
+
+  tasks:
+# -------------------------------------------------------------------------
+    # Task 1: Ensure system dependencies and Docker environment are installed
+    # -------------------------------------------------------------------------
+    - name: 1. Install required system packages
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - python3-pip
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600  # Reuse package cache if updated within the last hour
+      environment:
+        DEBIAN_FRONTEND: noninteractive # Prevents APT from waiting on interactive prompts
+      ignore_errors: yes
+
+    - name: 1b. Install Docker engine & CLI
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        cache_valid_time: 3600
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      ignore_errors: yes
+
+    # -------------------------------------------------------------------------
+    # Task 2: Ensure the project workspace directory layout exists
+    # -------------------------------------------------------------------------
+    - name: 2. Create project directory structure
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      loop:
+        - "{{ project_dir }}"
+        - "{{ project_dir }}/config"
+        - "{{ project_dir }}/inference"
+        - "{{ project_dir }}/monitoring"
+        - "{{ project_dir }}/data_pipeline"
+
+    # -------------------------------------------------------------------------
+    # Task 3: Deploy Mosquitto configuration file
+    # -------------------------------------------------------------------------
+    - name: 3. Ensure Mosquitto configuration file exists
+      ansible.builtin.copy:
+        dest: "{{ project_dir }}/config/mosquitto.conf"
+        content: |
+          listener 1883 0.0.0.0
+          allow_anonymous true
+        mode: '0644'
+        owner: root
+        group: root
+
+ # -------------------------------------------------------------------------
+    # Task 4: Sync application assets and Docker build contexts
+    # -------------------------------------------------------------------------
+    - name: 4. Synchronize project repository files to target host
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: '0644'
+      loop:
+        - { src: 'docker-compose.yml', dest: '{{ project_dir }}/docker-compose.yml' }
+        - { src: 'requirements.txt', dest: '{{ project_dir }}/requirements.txt' }
+        - { src: 'inference/', dest: '{{ project_dir }}/inference/' }
+        - { src: 'monitoring/', dest: '{{ project_dir }}/monitoring/' }
+        - { src: 'data_pipeline/', dest: '{{ project_dir }}/data_pipeline/' }
+
+    # -------------------------------------------------------------------------
+    # Task 5: Build microservice Docker images idempotently
+    # -------------------------------------------------------------------------
+    - name: 5. Build edge container images via Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        build: always
+        state: present
+
+    # -------------------------------------------------------------------------
+    # Task 6: Launch containerized microservice stack
+    # -------------------------------------------------------------------------
+    - name: 6. Bring up container stack in detached mode
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        state: present
+
+    # -------------------------------------------------------------------------
+    # Task 7: Healthcheck validation (verify all 4 containers are running)
+    # -------------------------------------------------------------------------
+    - name: 7. Validate running container status
+      community.docker.docker_container_info:
+        name: "{{ item }}"
+      register: container_status
+      failed_when: >
+        not container_status.exists or 
+        not container_status.container.State.Running
+      loop:
+        - logibridge_mqtt
+        - logibridge_inference
+        - logibridge_drift_monitor
+        - logibridge_simulator

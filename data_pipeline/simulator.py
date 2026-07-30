@@ -3,9 +3,10 @@ import time
 import json
 import random
 import paho.mqtt.client as mqtt
+import os
 
-MQTT_BROKER = "localhost"
-MQTT_PORT = 1883
+MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt-broker")
+MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 
 TOPIC_TEMP = "logibridge/trucks/01/sensors/temperature"
 TOPIC_VIBE = "logibridge/trucks/01/sensors/vibration"
@@ -23,11 +24,18 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    client = mqtt.Client(client_id="Truck_01_Sim")
-    client.connect(MQTT_BROKER, MQTT_PORT, 60)
-    client.loop_start()
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="Truck_01_Sim")
     
-    print(f"[SIMULATOR] Started in mode: {args.anomaly}")
+    print(f"Connecting to MQTT Broker at {MQTT_BROKER}:{MQTT_PORT}...", flush=True)
+    try:
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+        client.loop_start()  # ✅ Always start the loop on successful connection
+        print("Connected successfully!", flush=True)
+    except Exception as e:
+        print(f"Failed to connect to MQTT broker: {e}", flush=True)
+        return
+
+    print(f"[SIMULATOR] Started in mode: {args.anomaly}", flush=True)
     
     base_temp = 4.0
     step_count = 0
@@ -36,11 +44,13 @@ def main():
         while True:
             # 1. Temperature Stream (1 Hz)
             if args.anomaly in ["temp_drift", "combined"]:
-                base_temp += 0.08  # Linear drift: +0.08°C per reading
+                # Cap base_temp so normalized feature values stay within model bounds
+                MAX_TEMP_CEILING = 31.0  # Max realistic anomaly baseline (e.g., 25.0 baseline + 6.0°C drift)
+                base_temp = min(base_temp + 0.08, MAX_TEMP_CEILING)
                 temp = random.normalvariate(base_temp, 0.3)
             else:
                 temp = random.normalvariate(4.0, 0.3)
-                
+            print(f"[{args.anomaly}] Publishing Temp = {temp:.3f}")
             temp_payload = {"timestamp": time.time(), "value": round(temp, 3)}
             client.publish(TOPIC_TEMP, json.dumps(temp_payload), qos=1)
             
@@ -64,7 +74,8 @@ def main():
             time.sleep(1)
             
     except KeyboardInterrupt:
-        print("[SIMULATOR] Terminating stream...")
+        print("[SIMULATOR] Terminating stream...", flush=True)
+    finally:
         client.loop_stop()
         client.disconnect()
 

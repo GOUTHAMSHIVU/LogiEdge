@@ -10,8 +10,8 @@ from scipy.stats import kurtosis
 MODEL_PATH = os.getenv("MODEL_PATH", "inference/model.tflite")
 TRUCK_ID = os.getenv("TRUCK_ID", "01")
 
-MQTT_BROKER = "localhost"
-MQTT_PORT = 1883
+MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt-broker")
+MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 TOPIC_SUB_TEMP = f"logibridge/trucks/{TRUCK_ID}/sensors/temperature"
 TOPIC_SUB_VIBE = f"logibridge/trucks/{TRUCK_ID}/sensors/vibration"
 TOPIC_PUB_INF  = f"logibridge/trucks/{TRUCK_ID}/inference"
@@ -45,7 +45,7 @@ def moving_average(buf, val):
     buf.append(val)
     return sum(buf) / len(buf)
 
-def extract_features():
+"""def extract_features():
     if len(temp_buffer) < 30 or len(vibe_buffer) < 15:
         return None
     t_data = np.array(temp_buffer)
@@ -61,24 +61,69 @@ def extract_features():
     v_kurt = float(kurtosis(v_data, fisher=True))
     
     raw_vector = np.array([t_mean, t_std, t_rate, v_rms, v_peak, v_kurt])
-        
+
     # Apply Z-Score Normalization
-    return (raw_vector - stats["mean"]) / (stats["std"] + 1e-8)
+    return (raw_vector - stats["mean"]) / (stats["std"] + 1e-8)"""
+def extract_features():
+    if len(temp_buffer) < 30 or len(vibe_buffer) < 15:
+        return None
+
+    t_data = np.array(temp_buffer)
+    v_data = np.array(vibe_buffer)
+    
+    t_mean = np.mean(t_data)
+    t_std = np.std(t_data)
+    t_rate = ((t_data[-1] - t_data[0]) / 30.0) * 60.0
+
+    v_rms = np.sqrt(np.mean(v_data**2))
+    v_peak = np.max(np.abs(v_data))
+    v_kurt = float(kurtosis(v_data, fisher=True))
+
+    raw_vector = np.array([
+        t_mean,
+        t_std,
+        t_rate,
+        v_rms,
+        v_peak,
+        v_kurt
+    ])
+
+    normalized = (raw_vector - stats["mean"]) / (stats["std"] + 1e-8)
+
+    return normalized
 
 def execute_inference(scaled_features):
     input_scale, input_zero_point = input_details[0]['quantization']
     
-    # Scale float features to quantized INT8 constraints (-128 to 127)
-    quantized_input = (scaled_features / input_scale) + input_zero_point
-    quantized_input = np.clip(quantized_input, -128, 127).astype(np.int8)
-    quantized_input = np.expand_dims(quantized_input, axis=0)
-    
-    interpreter.set_tensor(input_details[0]['index'], quantized_input)
+    # 1. Input Tensor Preparation
+    if input_scale == 0 or input_scale is None:
+        # Float32 model
+        input_data = np.expand_dims(scaled_features, axis=0).astype(np.float32)
+    else:
+        # INT8 Quantized model
+        quantized_input = (scaled_features / input_scale) + input_zero_point
+        quantized_input = np.clip(quantized_input, -128, 127).astype(np.int8)
+        input_data = np.expand_dims(quantized_input, axis=0)
+        
+    interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     
-    quantized_output = interpreter.get_tensor(output_details[0]['index'])[0]
+    # 2. Output Tensor Extraction
+    raw_output = interpreter.get_tensor(output_details[0]['index'])[0]
     out_scale, out_zero_point = output_details[0]['quantization']
-    probs = (quantized_output.astype(np.float32) - out_zero_point) * out_scale
+
+    # 3. Output Scale Decoding
+    if out_scale == 0 or out_scale is None:
+        # Model output is already float probabilities (Softmax)
+        probs = raw_output.astype(np.float32)
+    else:
+        # Model output is INT8 quantized
+        probs = (raw_output.astype(np.float32) - out_zero_point) * out_scale
+        
+    # Ensure probabilities sum to 1 if dequantization introduced slight noise
+    if np.sum(probs) > 0:
+        probs = probs / np.sum(probs)
+        
     return probs
 
 def on_message(client, userdata, msg):
@@ -87,6 +132,9 @@ def on_message(client, userdata, msg):
     if val is None: return
     
     if msg.topic == TOPIC_SUB_TEMP:
+        # print(f"RAW MQTT TEMP: {val}")
+        filtered_val = moving_average(temp_filter_buf, val)
+        # print(f"FILTERED TEMP: {filtered_val}")
         temp_buffer.append(moving_average(temp_filter_buf, val))
     elif msg.topic == TOPIC_SUB_VIBE:
         vibe_buffer.append(moving_average(vibe_filter_buf, val))

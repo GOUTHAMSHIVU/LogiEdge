@@ -1,0 +1,6 @@
+numpy<2.0.0,>=1.24.0
+scipy>=1.10.0
+paho-mqtt>=2.0.0
+tflite-runtime>=2.14.0; platform_system != "Windows"
+tensorflow>=2.14.0; platform_system == "Windows"
+psutil>=5.9.0
