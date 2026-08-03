@@ -10,8 +10,8 @@ from scipy.stats import kurtosis
 TRUCK_ID = "01"
 MQTT_BROKER = "localhost"
 MQTT_PORT = 1883
-TOPIC_TEMP = f"logibridge/trucks/{TRUCK_ID}/sensors/temperature"
-TOPIC_VIBE = f"logibridge/trucks/{TRUCK_ID}/sensors/vibration"
+TOPIC_TEMP = f"LogiEdge/trucks/{TRUCK_ID}/sensors/temperature"
+TOPIC_VIBE = f"LogiEdge/trucks/{TRUCK_ID}/sensors/vibration"
 
 temp_buffer = deque(maxlen=30)
 vibe_buffer = deque(maxlen=15)

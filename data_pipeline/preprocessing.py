@@ -43,11 +43,11 @@ def on_message(client, userdata, msg):
             return
         val = payload["value"]
         
-        if msg.topic == "logibridge/trucks/01/sensors/temperature":
+        if msg.topic == "LogiEdge/trucks/01/sensors/temperature":
             filtered_val = moving_average(temp_filter_buf, val)
             temp_buffer.append(filtered_val)
             
-        elif msg.topic == "logibridge/trucks/01/sensors/vibration":
+        elif msg.topic == "LogiEdge/trucks/01/sensors/vibration":
             filtered_val = moving_average(vibe_filter_buf, val)
             vibe_buffer.append(filtered_val)
     except Exception as e:
@@ -58,8 +58,8 @@ def main():
     client.on_message = on_message
     client.connect("localhost", 1883, 60)
     
-    client.subscribe("logibridge/trucks/01/sensors/temperature")
-    client.subscribe("logibridge/trucks/01/sensors/vibration")
+    client.subscribe("LogiEdge/trucks/01/sensors/temperature")
+    client.subscribe("LogiEdge/trucks/01/sensors/vibration")
     
     client.loop_start()
     

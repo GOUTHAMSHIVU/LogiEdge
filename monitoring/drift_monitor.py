@@ -10,11 +10,11 @@ TRUCK_ID = os.getenv("TRUCK_ID", "01")
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt-broker")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 
-TOPIC_SUB_INF = f"logibridge/trucks/{TRUCK_ID}/inference"
+TOPIC_SUB_INF = f"LogiEdge/trucks/{TRUCK_ID}/inference"
 REF_PATH = "monitoring/reference_dist.json"
 
 CHECK_INTERVAL_SEC = 5
-MIN_SAMPLES = 20  # Analyzes drift when at least 5 samples arrive
+MIN_SAMPLES = 20  # Analyzes drift when at least 20 samples arrive
 
 with open(REF_PATH, "r") as f:
     ref = json.load(f)
@@ -60,7 +60,7 @@ def on_message(client, userdata, msg):
                 print(f"PSI Score: {psi:.4f} | Evaluated Samples: {len(confidence_history)}", flush=True)
                 print(f"Confidence Queue: {list(confidence_history)}", flush=True)
                 if psi > 0.25:
-                    print(f"[LOGIBRIDGE DRIFT ALERT] Distribution Shift Detected! (PSI={psi:.4f} > 0.25)", flush=True)
+                    print(f"[LogiEdge DRIFT ALERT] Distribution Shift Detected! (PSI={psi:.4f} > 0.25)", flush=True)
                 print("--------------------------------\n", flush=True)
             else:
                 print(f"[MONITOR STATUS] Accumulating samples... ({len(confidence_history)}/{MIN_SAMPLES})", flush=True)

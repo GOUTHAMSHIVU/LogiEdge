@@ -12,9 +12,9 @@ TRUCK_ID = os.getenv("TRUCK_ID", "01")
 
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt-broker")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
-TOPIC_SUB_TEMP = f"logibridge/trucks/{TRUCK_ID}/sensors/temperature"
-TOPIC_SUB_VIBE = f"logibridge/trucks/{TRUCK_ID}/sensors/vibration"
-TOPIC_PUB_INF  = f"logibridge/trucks/{TRUCK_ID}/inference"
+TOPIC_SUB_TEMP = f"LogiEdge/trucks/{TRUCK_ID}/sensors/temperature"
+TOPIC_SUB_VIBE = f"LogiEdge/trucks/{TRUCK_ID}/sensors/vibration"
+TOPIC_PUB_INF  = f"LogiEdge/trucks/{TRUCK_ID}/inference"
 
 # 2. Window Buffers
 temp_buffer = deque(maxlen=30)

@@ -1,24 +1,24 @@
 networks:
-  logibridge-net:
+  LogiEdge-net:
     driver: bridge
 
 services:
   mqtt-broker:
     image: eclipse-mosquitto:2.0
-    container_name: logibridge_mqtt
+    container_name: LogiEdge_mqtt
     ports:
       - "1883:1883"
     volumes:
       - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
     networks:
-      - logibridge-net
+      - LogiEdge-net
     restart: always
 
   inference-service:
     build:
       context: .
       dockerfile: inference/Dockerfile
-    container_name: logibridge_inference
+    container_name: LogiEdge_inference
     environment:
       - MODEL_PATH=inference/model.tflite
       - TRUCK_ID=01
@@ -26,14 +26,14 @@ services:
     depends_on:
       - mqtt-broker
     networks:
-      - logibridge-net
+      - LogiEdge-net
     restart: always
 
   drift-monitor:
     build:
       context: .
       dockerfile: inference/Dockerfile
-    container_name: logibridge_drift_monitor
+    container_name: LogiEdge_drift_monitor
     command: ["python", "monitoring/drift_monitor.py"]
     environment:
       - PYTHONUNBUFFERED=1
@@ -43,14 +43,14 @@ services:
       - mqtt-broker
       - inference-service
     networks:
-      - logibridge-net
+      - LogiEdge-net
     restart: always
 
   simulator:
     build:
       context: .
       dockerfile: inference/Dockerfile
-    container_name: logibridge_simulator
+    container_name: LogiEdge_simulator
     command: ["python", "data_pipeline/simulator.py", "--anomaly", "${SIM_MODE:-none}"]
     environment:
       - MQTT_BROKER=mqtt-broker
@@ -58,4 +58,4 @@ services:
     depends_on:
       - mqtt-broker
     networks:
-      - logibridge-net
+      - LogiEdge-net

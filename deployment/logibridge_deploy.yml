@@ -1,9 +1,9 @@
 ---
-- name: Deploy LogiBridge Edge Inference Stack
+- name: Deploy LogiEdge Edge Inference Stack
   hosts: edge_nodes
   become: yes
   vars:
-    project_dir: /opt/logibridge
+    project_dir: /opt/LogiEdge
     docker_compose_version: "v2.24.1"
 
   tasks:
@@ -110,7 +110,7 @@
         not container_status.exists or 
         not container_status.container.State.Running
       loop:
-        - logibridge_mqtt
-        - logibridge_inference
-        - logibridge_drift_monitor
-        - logibridge_simulator
+        - LogiEdge_mqtt
+        - LogiEdge_inference
+        - LogiEdge_drift_monitor
+        - LogiEdge_simulator

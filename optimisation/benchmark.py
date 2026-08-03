@@ -206,7 +206,7 @@ def generate_pareto_chart(results):
     ax2.tick_params(axis='y', labelcolor=color)
     ax2.set_ylim(min(accuracies) - 5, 105)
 
-    plt.title('LogiBridge Edge AI Pareto Optimization Frontier — Held-Out Validation Set',
+    plt.title('LogiEdge Edge AI Pareto Optimization Frontier — Held-Out Validation Set',
               fontweight='bold', fontsize=14, pad=15)
     fig.tight_layout()
 

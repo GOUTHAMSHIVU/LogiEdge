@@ -8,9 +8,9 @@ import os
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt-broker")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 
-TOPIC_TEMP = "logibridge/trucks/01/sensors/temperature"
-TOPIC_VIBE = "logibridge/trucks/01/sensors/vibration"
-TOPIC_DOOR = "logibridge/trucks/01/sensors/door"
+TOPIC_TEMP = "LogiEdge/trucks/01/sensors/temperature"
+TOPIC_VIBE = "LogiEdge/trucks/01/sensors/vibration"
+TOPIC_DOOR = "LogiEdge/trucks/01/sensors/door"
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LogiEdge Cold-Chain Sensor Simulator")
