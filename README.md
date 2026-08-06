@@ -9,31 +9,31 @@
 ---
 
 ```markdown
-# LogiBridge — Edge AI & Automated DevOps for Cold-Chain Logistics
+# logiedge — Edge AI & Automated DevOps for Cold-Chain Logistics
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker Compose](https://img.shields.io/badge/Docker--Compose-v2-blue)](https://docs.docker.com/compose/)
 [![Ansible](https://img.shields.io/badge/Ansible-IaC-red)](https://www.ansible.com/)
 [![TFLite](https://img.shields.io/badge/TensorFlow--Lite-INT8-orange)](https://www.tensorflow.org/lite)
 
-LogiBridge is a microservice-based, containerized Edge AI telemetry monitoring system designed for cold-chain logistics. By processing multi-sensor telemetry directly at the edge, LogiBridge eliminates cloud latency and network vulnerabilities, executing real-time anomaly detection and statistical model drift analysis on local nodes.
+logiedge is a microservice-based, containerized Edge AI telemetry monitoring system designed for cold-chain logistics. By processing multi-sensor telemetry directly at the edge, logiedge eliminates cloud latency and network vulnerabilities, executing real-time anomaly detection and statistical model drift analysis on local nodes.
 
 ---
 
 ## 🏛️ System Architecture
 
-LogiBridge deploys four isolated Docker microservices communicating asynchronously via an internal MQTT bridge network (`logibridge_net`):
+logiedge deploys four isolated Docker microservices communicating asynchronously via an internal MQTT bridge network (`logiedge_net`):
 
 ```text
 +------------------------+      Raw Telemetry      +-----------------------+
-|  logibridge_simulator  | ----------------------> |    logibridge_mqtt    |
+|  logiedge_simulator  | ----------------------> |    logiedge_mqtt    |
 | (Data / Fault Pipeline)|                         |   (Mosquitto Broker)  |
 +------------------------+                         +-----------+-----------+
                                                                ^     |
                                               Telemetry (Sub)  |     | Predictions (Sub)
                                             Predictions (Pub)  v     v
                             +------------------------------+   +----------------------------------+
-                            |     logibridge_inference     |   |    logibridge_drift_monitor     |
+                            |     logiedge_inference     |   |    logiedge_drift_monitor     |
                             |   (TFLite Engine & Fusion)   |   |   (KS Drift & Baseline Stat)     |
                             +------------------------------+   +----------------------------------+
 
@@ -43,16 +43,16 @@ LogiBridge deploys four isolated Docker microservices communicating asynchronous
 
 | Container Name | Technology Stack | Role & Function |
 | --- | --- | --- |
-| **`logibridge_mqtt`** | Eclipse Mosquitto (v2.0) | Central MQTT message broker handling internal sensor/inference routing (`1883/TCP`). |
-| **`logibridge_simulator`** | Python 3.10, Paho MQTT | Simulates multi-sensor streams (temperature, vibration, door state) & fault injections. |
-| **`logibridge_inference`** | Python 3.10, TFLite Runtime | Aggregates sliding window features, normalizes inputs, and runs local TFLite forward pass. |
-| **`logibridge_drift_monitor`** | Python 3.10, SciPy, NumPy | Computes real-time Kolmogorov-Smirnov (KS) and PSI tests to flag input telemetry drift. |
+| **`logiedge_mqtt`** | Eclipse Mosquitto (v2.0) | Central MQTT message broker handling internal sensor/inference routing (`1883/TCP`). |
+| **`logiedge_simulator`** | Python 3.10, Paho MQTT | Simulates multi-sensor streams (temperature, vibration, door state) & fault injections. |
+| **`logiedge_inference`** | Python 3.10, TFLite Runtime | Aggregates sliding window features, normalizes inputs, and runs local TFLite forward pass. |
+| **`logiedge_drift_monitor`** | Python 3.10, SciPy, NumPy | Computes real-time Kolmogorov-Smirnov (KS) and PSI tests to flag input telemetry drift. |
 
 ---
 
 ## ⚡ Edge AI Model Optimization Benchmarks
 
-LogiBridge implements an optimized **Train $\rightarrow$ Prune $\rightarrow$ Quantize** pipeline to fit stringent edge hardware budgets without sacrificing accuracy:
+logiedge implements an optimized **Train $\rightarrow$ Prune $\rightarrow$ Quantize** pipeline to fit stringent edge hardware budgets without sacrificing accuracy:
 
 | Model Variant | Accuracy (%) | Critical Recall (%) | Mean Latency (ms) | Model Size (KB) | Energy / Inf (mJ) |
 | --- | --- | --- | --- | --- | --- |
@@ -78,7 +78,7 @@ LogiBridge implements an optimized **Train $\rightarrow$ Prune $\rightarrow$ Qua
 Deploy the full stack idempotently using Ansible:
 
 ```bash
-ansible-playbook logibridge_deploy.yml
+ansible-playbook logiedge_deploy.yml
 
 ```
 
@@ -88,8 +88,8 @@ Alternatively, bring up the microservice stack directly via Docker Compose:
 
 ```bash
 # Clone repository
-git clone [https://github.com/your-org/logibridge.git](https://github.com/your-org/logibridge.git)
-cd logibridge
+git clone [https://github.com/your-org/logiedge.git](https://github.com/your-org/logiedge.git)
+cd logiedge
 
 # Build and launch microservices
 docker compose up -d --build
@@ -110,7 +110,7 @@ Validate the edge inference engine and real-time drift monitor by injecting simu
 Simulates a refrigeration cooling failure (linear increment of $+0.08^\circ\text{C}$ per sample):
 
 ```bash
-docker exec -it logibridge_simulator python3 data_pipeline/simulator.py --anomaly temp_drift
+docker exec -it logiedge_simulator python3 data_pipeline/simulator.py --anomaly temp_drift
 
 ```
 
@@ -119,7 +119,7 @@ docker exec -it logibridge_simulator python3 data_pipeline/simulator.py --anomal
 Simulates compressor bearing wear combined with door latch failure:
 
 ```bash
-docker exec -it logibridge_simulator python3 data_pipeline/simulator.py --anomaly combined
+docker exec -it logiedge_simulator python3 data_pipeline/simulator.py --anomaly combined
 
 ```
 
@@ -128,14 +128,14 @@ docker exec -it logibridge_simulator python3 data_pipeline/simulator.py --anomal
 Inspect incoming feature vectors and state classifications in real time:
 
 ```bash
-docker logs -f logibridge_inference
+docker logs -f logiedge_inference
 
 ```
 
 Inspect Kolmogorov-Smirnov statistical divergence alerts:
 
 ```bash
-docker logs -f logibridge_drift_monitor
+docker logs -f logiedge_drift_monitor
 
 ```
 
@@ -144,9 +144,9 @@ docker logs -f logibridge_drift_monitor
 ## 📂 Project Structure
 
 ```text
-logibridge/
+logiedge/
 ├── ansible/
-│   └── logibridge_deploy.yml   # Infrastructure as Code deployment playbook
+│   └── logiedge_deploy.yml   # Infrastructure as Code deployment playbook
 ├── data_pipeline/
 │   ├── generate_dataset.py     # Synthetic data & statistical parameter generator
 │   ├── simulator.py            # Real-time MQTT telemetry & fault injector
@@ -174,9 +174,9 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 ***
 
 <ElicitationsGroup message="What would you like to do next?">
-<Elicitation label="Add a License section or LICENSE file template" query="Generate an MIT License file for LogiBridge" query_intent="CLICKABLE_SUGGESTION" />
-<Elicitation label="Create a GitHub Actions CI/CD pipeline for docker build verification" query="Draft a GitHub Actions workflow for LogiBridge Docker builds" query_intent="CLICKABLE_SUGGESTION" />
-<Elicitation label="Generate environment variable template file (.env.example)" query="Draft a .env.example file for LogiBridge" query_intent="CLICKABLE_SUGGESTION" />
+<Elicitation label="Add a License section or LICENSE file template" query="Generate an MIT License file for logiedge" query_intent="CLICKABLE_SUGGESTION" />
+<Elicitation label="Create a GitHub Actions CI/CD pipeline for docker build verification" query="Draft a GitHub Actions workflow for logiedge Docker builds" query_intent="CLICKABLE_SUGGESTION" />
+<Elicitation label="Generate environment variable template file (.env.example)" query="Draft a .env.example file for logiedge" query_intent="CLICKABLE_SUGGESTION" />
 </ElicitationsGroup>
 
 ```

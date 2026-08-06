@@ -29,7 +29,7 @@ def main():
     print(f"Connecting to MQTT Broker at {MQTT_BROKER}:{MQTT_PORT}...", flush=True)
     try:
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.loop_start()  # ✅ Always start the loop on successful connection
+        client.loop_start()  #  Always start the loop on successful connection
         print("Connected successfully!", flush=True)
     except Exception as e:
         print(f"Failed to connect to MQTT broker: {e}", flush=True)

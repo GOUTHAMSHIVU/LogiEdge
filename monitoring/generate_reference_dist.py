@@ -21,9 +21,12 @@ def generate_clean_normal_features(n):
 
 def main():
     stats = np.load(STATS_PATH, allow_pickle=True).item()
-    X = generate_clean_normal_features(N_SAMPLES)
+    X = np.load("training/windows_none.npy")
+    print(f"Number of normal windows: {len(X)}")
+    if len(X) > N_SAMPLES:
+        idx = np.random.choice(len(X), N_SAMPLES, replace=False)
+        X = X[idx]
     X_norm = ((X - stats["mean"]) / (stats["std"] + 1e-8)).astype(np.float32)
-
     interpreter = tflite.Interpreter(model_path=MODEL_PATH)
     interpreter.allocate_tensors()
     in_d = interpreter.get_input_details()
@@ -47,11 +50,16 @@ def main():
     ref = {
         "bin_edges": BIN_EDGES,
         "bin_percentages": pct,
-        "n_samples": N_SAMPLES
+        "n_samples": len(X)
     }
     with open(OUTPUT_PATH, "w") as f:
         json.dump(ref, f, indent=2)
     print(f"[SUCCESS] Reference distribution saved to {OUTPUT_PATH}: {pct}")
+    print("Confidence statistics")
+    print("Min :", np.min(confidences))
+    print("Max :", np.max(confidences))
+    print("Mean:", np.mean(confidences))
+    print("Unique (rounded):", np.unique(np.round(confidences, 3)))
 
 if __name__ == "__main__":
     main()

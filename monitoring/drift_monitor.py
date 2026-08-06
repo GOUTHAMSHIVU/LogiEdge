@@ -21,7 +21,7 @@ with open(REF_PATH, "r") as f:
 BIN_EDGES = ref["bin_edges"]
 EXPECTED_PCT = np.array(ref["bin_percentages"])
 
-confidence_history = deque(maxlen=20)
+confidence_history = deque(maxlen=MIN_SAMPLES)
 last_check_time = time.time()
 
 def calculate_psi(expected_pct, actual_counts, total):

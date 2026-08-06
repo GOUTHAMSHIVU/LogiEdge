@@ -15,7 +15,7 @@ MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 TOPIC_SUB_TEMP = f"LogiEdge/trucks/{TRUCK_ID}/sensors/temperature"
 TOPIC_SUB_VIBE = f"LogiEdge/trucks/{TRUCK_ID}/sensors/vibration"
 TOPIC_PUB_INF  = f"LogiEdge/trucks/{TRUCK_ID}/inference"
-
+INFERENCE_INTERVAL_SEC = 1
 # 2. Window Buffers
 temp_buffer = deque(maxlen=30)
 vibe_buffer = deque(maxlen=15)
@@ -155,7 +155,7 @@ def main():
     try:
         while True:
             curr_time = time.time()
-            if curr_time - last_window_time >= 10:
+            if curr_time - last_window_time >= INFERENCE_INTERVAL_SEC:
                 features = extract_features()
                 if features is not None:
                     print(f"\n[DEBUG DATA IN] Fused & Normalized Vector: {np.round(features, 4)}")
