@@ -13,8 +13,8 @@ MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 TOPIC_SUB_INF = f"LogiEdge/trucks/{TRUCK_ID}/inference"
 REF_PATH = "monitoring/reference_dist.json"
 
-CHECK_INTERVAL_SEC = 5
-MIN_SAMPLES = 20  # Analyzes drift when at least 20 samples arrive
+CHECK_INTERVAL_SEC = 60
+MIN_SAMPLES = 100  # Analyzes drift when at least 20 samples arrive
 
 with open(REF_PATH, "r") as f:
     ref = json.load(f)
