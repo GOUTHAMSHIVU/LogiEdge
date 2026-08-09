@@ -2,66 +2,58 @@
 - name: LogiEdge Model Update Workflow (Task E2)
   hosts: edge_nodes
   become: false
+
   vars:
     project_dir: /opt/LogiEdge
 
   tasks:
 
-    #######################################################################
-    # Task 1 - Stop the running inference container
-    #######################################################################
-    - name: Stop LogiEdge inference container
-      ansible.builtin.command:
-        cmd: docker stop LogiEdge_inference
-      ignore_errors: true
+    - name: Ensure LogiEdge directory exists
+      ansible.builtin.file:
+        path: "{{ project_dir }}"
+        state: directory
+        mode: "0755"
 
-    #######################################################################
-    # Task 2 - Copy updated TensorFlow Lite model
-    #######################################################################
     - name: Copy updated model.tflite
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../inference/model.tflite"
         dest: "{{ project_dir }}/inference/model.tflite"
         mode: "0644"
+      register: model_update
 
-    #######################################################################
-    # Task 3 - Copy updated PSI reference distribution
-    #######################################################################
     - name: Copy updated reference_dist.json
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../monitoring/reference_dist.json"
         dest: "{{ project_dir }}/monitoring/reference_dist.json"
         mode: "0644"
+      register: reference_update
 
-    #######################################################################
-    # Task 4 - Rebuild inference image
-    #######################################################################
-    - name: Rebuild inference image
+    - name: Stop LogiEdge inference container if update is required
       ansible.builtin.command:
-        cmd: docker compose build inference-service
+        cmd: docker stop LogiEdge_inference
+      when: model_update.changed or reference_update.changed
+      failed_when: false
+
+    - name: Pull updated inference container image
+      ansible.builtin.command:
+        cmd: docker compose pull inference-service
       args:
         chdir: "{{ project_dir }}"
+      when: model_update.changed or reference_update.changed
 
-    #######################################################################
-    # Task 5 - Restart inference service
-    #######################################################################
-    - name: Restart inference service
+    - name: Start inference container with environment variables
       ansible.builtin.command:
         cmd: docker compose up -d inference-service
       args:
         chdir: "{{ project_dir }}"
+      register: start_result
+      changed_when: start_result.stdout is search("Started|Created|Recreated")
+      when: model_update.changed or reference_update.changed or start_result is not defined
 
-    #######################################################################
-    # Task 6 - Verify container is running
-    #######################################################################
-    - name: Verify inference container
-      community.docker.docker_container_info:
-        name: LogiEdge_inference
+    - name: Wait 15 seconds and verify inference container
+      ansible.builtin.shell: |
+        sleep 15
+        docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' LogiEdge_inference
       register: inference_status
-
-    - name: Display deployment status
-      ansible.builtin.debug:
-        msg:
-          - "Model update completed successfully."
-          - "Inference container running: {{ inference_status.container.State.Running }}"
-          - "Container name: LogiEdge_inference"
+      changed_when: false
+      failed_when: inference_status.stdout.strip() != "true"
