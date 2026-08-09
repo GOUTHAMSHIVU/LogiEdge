@@ -14,7 +14,7 @@ TOPIC_SUB_INF = f"LogiEdge/trucks/{TRUCK_ID}/inference"
 REF_PATH = "monitoring/reference_dist.json"
 
 CHECK_INTERVAL_SEC = 60
-MIN_SAMPLES = 100  # Analyzes drift when at least 20 samples arrive
+MIN_SAMPLES = 100  # Analyzes drift when at least 100 samples arrive
 
 with open(REF_PATH, "r") as f:
     ref = json.load(f)

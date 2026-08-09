@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="LogiEdge Architecture" id="i5ihxkcniVcPGAw9IsIF">
+    <mxGraphModel dx="1431" dy="568" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ma-hyClcFMjJviuBXc-O-1" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#343a40;fontStyle=1;fontSize=14;startSize=30;horizontal=1;" value="TRUCK EDGE NODE (Local Vehicle Boundary / Raspberry Pi 4B)" vertex="1">
+          <mxGeometry height="460" width="1020" x="400" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-2" parent="ma-hyClcFMjJviuBXc-O-1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#e9ecef;strokeColor=#6c757d;fontStyle=1;startSize=25;" value="Sensor Layer" vertex="1">
+          <mxGeometry height="230" width="220" x="30" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-3" parent="ma-hyClcFMjJviuBXc-O-2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#495057;fontStyle=0;" value="Temperature Sensor&#xa;(1 Hz)" vertex="1">
+          <mxGeometry height="45" width="180" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-4" parent="ma-hyClcFMjJviuBXc-O-2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#495057;fontStyle=0;" value="Vibration Sensor&#xa;(500 Hz)" vertex="1">
+          <mxGeometry height="45" width="180" x="20" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-5" parent="ma-hyClcFMjJviuBXc-O-2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#495057;fontStyle=0;" value="Door Event Sensor&#xa;(Discrete Open/Close)" vertex="1">
+          <mxGeometry height="45" width="180" x="20" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-6" parent="ma-hyClcFMjJviuBXc-O-1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#e7f5ff;strokeColor=#1c7ed6;fontStyle=1;startSize=25;" value="Docker Bridge Network (logiedge_net)" vertex="1">
+          <mxGeometry height="380" width="460" x="280" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-7" parent="ma-hyClcFMjJviuBXc-O-6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1c7ed6;" value="&lt;b&gt;logiedge_simulator&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Data &amp; Fault Pipeline)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-8" parent="ma-hyClcFMjJviuBXc-O-6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1c7ed6;" value="&lt;b&gt;logiedge_mqtt&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Mosquitto Broker)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="260" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-9" parent="ma-hyClcFMjJviuBXc-O-6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d3f9d8;strokeColor=#2b8a3e;fontColor=#2b8a3e;" value="&lt;b&gt;logiedge_inference&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Feature Fusion + M2 INT8 TFLite)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="60" width="210" x="20" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-10" parent="ma-hyClcFMjJviuBXc-O-6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1c7ed6;" value="&lt;b&gt;logiedge_drift_monitor&lt;/b&gt;&lt;br&gt;&lt;i&gt;(PSI Window = 100 samples)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="60" width="190" x="250" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-11" edge="1" parent="ma-hyClcFMjJviuBXc-O-6" source="ma-hyClcFMjJviuBXc-O-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-8" value="Pub: Telemetry&#xa;(QoS 0/1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-12" edge="1" parent="ma-hyClcFMjJviuBXc-O-6" source="ma-hyClcFMjJviuBXc-O-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-9" value="Sub: Telemetry (QoS 0)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-13" edge="1" parent="ma-hyClcFMjJviuBXc-O-6" source="ma-hyClcFMjJviuBXc-O-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-8" value="Pub: Predictions (QoS 1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-14" edge="1" parent="ma-hyClcFMjJviuBXc-O-6" source="ma-hyClcFMjJviuBXc-O-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-10" value="Sub: Predictions (QoS 1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-15" parent="ma-hyClcFMjJviuBXc-O-1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fff9db;strokeColor=#f59f00;fontStyle=1;startSize=25;" value="Local Persistent Storage" vertex="1">
+          <mxGeometry height="230" width="220" x="770" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-16" parent="ma-hyClcFMjJviuBXc-O-15" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#f59f00;" value="Local Alert Log Buffer&#xa;/opt/logiedge/logs/alerts.log" vertex="1">
+          <mxGeometry height="70" width="180" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-17" parent="ma-hyClcFMjJviuBXc-O-15" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#f59f00;" value="Local Drift Log&#xa;/opt/logiedge/logs/drift.log" vertex="1">
+          <mxGeometry height="70" width="180" x="20" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-18" edge="1" parent="ma-hyClcFMjJviuBXc-O-1" source="ma-hyClcFMjJviuBXc-O-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-7" value="Raw Readings">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-19" edge="1" parent="ma-hyClcFMjJviuBXc-O-1" source="ma-hyClcFMjJviuBXc-O-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="ma-hyClcFMjJviuBXc-O-16" value="Local Write">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-20" edge="1" parent="ma-hyClcFMjJviuBXc-O-1" source="ma-hyClcFMjJviuBXc-O-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="ma-hyClcFMjJviuBXc-O-17" value="Local Write">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe3e3;strokeColor=#e03131;fontStyle=1;fontSize=12;" value="Cellular Uplink (4G / LTE Intermittent WAN)&#xa;Store-and-Forward Sync" vertex="1">
+          <mxGeometry height="50" width="340" x="740" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-22" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f3d9fa;strokeColor=#ae3ec9;fontStyle=1;fontSize=13;startSize=30;" value="OPERATIONS CENTRE BACKEND" vertex="1">
+          <mxGeometry height="150" width="540" x="640" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-23" parent="ma-hyClcFMjJviuBXc-O-22" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#ae3ec9;" value="Central Telemetry DB&#xa;&amp; Alert Repository" vertex="1">
+          <mxGeometry height="80" width="180" x="40" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-24" parent="ma-hyClcFMjJviuBXc-O-22" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ae3ec9;fontStyle=1;" value="Fleet Management Dashboard&#xa;&amp; Escalation System" vertex="1">
+          <mxGeometry height="80" width="220" x="280" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-25" edge="1" parent="1" source="ma-hyClcFMjJviuBXc-O-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-21" value="Offline Buffer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ma-hyClcFMjJviuBXc-O-26" edge="1" parent="1" source="ma-hyClcFMjJviuBXc-O-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ma-hyClcFMjJviuBXc-O-22" value="Sync on Signal Recovery">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

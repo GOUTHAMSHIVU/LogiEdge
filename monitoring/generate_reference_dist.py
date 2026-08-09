@@ -21,7 +21,7 @@ def generate_clean_normal_features(n):
 
 def main():
     stats = np.load(STATS_PATH, allow_pickle=True).item()
-    X = np.load("training/windows_none.npy")
+    X = np.load("training/windows_none_E1.npy")
     print(f"Number of normal windows: {len(X)}")
     if len(X) > N_SAMPLES:
         idx = np.random.choice(len(X), N_SAMPLES, replace=False)
@@ -42,6 +42,8 @@ def main():
         interpreter.invoke()
         q_out = interpreter.get_tensor(out_d[0]["index"])[0]
         probs = (q_out.astype(np.float32) - out_zp) * out_scale
+        if np.sum(probs) > 0:
+            probs = probs / np.sum(probs)
         confidences.append(float(np.max(probs)))
 
     counts, _ = np.histogram(confidences, bins=BIN_EDGES)

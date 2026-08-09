@@ -15,7 +15,7 @@ MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 TOPIC_SUB_TEMP = f"LogiEdge/trucks/{TRUCK_ID}/sensors/temperature"
 TOPIC_SUB_VIBE = f"LogiEdge/trucks/{TRUCK_ID}/sensors/vibration"
 TOPIC_PUB_INF  = f"LogiEdge/trucks/{TRUCK_ID}/inference"
-INFERENCE_INTERVAL_SEC = 1
+INFERENCE_INTERVAL_SEC = 10
 # 2. Window Buffers
 temp_buffer = deque(maxlen=30)
 vibe_buffer = deque(maxlen=15)

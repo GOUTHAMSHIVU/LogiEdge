@@ -5,7 +5,7 @@ import random
 import paho.mqtt.client as mqtt
 import os
 
-MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt-broker")
+MQTT_BROKER = os.getenv("MQTT_BROKER","mqtt-broker")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 
 TOPIC_TEMP = "LogiEdge/trucks/01/sensors/temperature"

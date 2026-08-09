@@ -1,7 +1,7 @@
 import numpy as np
 
 def main():
-    X_normal = np.load("training/windows_none.npy")
+    X_normal = np.load("training/windows_none_D1.npy")
     X_warning = np.load("training/windows_temp_drift.npy")
     X_critical = np.load("training/windows_combined.npy")
 
