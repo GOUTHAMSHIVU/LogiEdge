@@ -135,7 +135,8 @@ def on_message(client, userdata, msg):
         # print(f"RAW MQTT TEMP: {val}")
         filtered_val = moving_average(temp_filter_buf, val)
         # print(f"FILTERED TEMP: {filtered_val}")
-        temp_buffer.append(moving_average(temp_filter_buf, val))
+        # temp_buffer.append(moving_average(temp_filter_buf, val))
+        temp_buffer.append(filtered_val)
     elif msg.topic == TOPIC_SUB_VIBE:
         vibe_buffer.append(moving_average(vibe_filter_buf, val))
 
